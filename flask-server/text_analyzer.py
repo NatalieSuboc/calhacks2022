@@ -134,7 +134,6 @@ class TextAnalyzer:
         :return:
         """
         chat_data = self.parser.get_messages(chat_name)
-        print(chat_data)
         sender_times = []
         for text in chat_data:
             sender = text['sender_name']
@@ -173,24 +172,42 @@ class TextAnalyzer:
         return timedelta(seconds=time_delta.total_seconds() * k)
 
     # ------------------EMOJI ANALYSIS FUNCTIONS---------------------
-    def get_emoji_usage(self, chat_name=None):
+    def get_emoji_usage(self, chat_name=None, person=None):
+        """
+        Gets emoji usage for each person, from most used to least used
+        :param chat_name:
+        :param person:
+        :return: dict{('sender': dict{('emoji': 'count')})}
+        """
+        if not chat_name:  # Across all chats
+            msg_contents = self.parser.get_all_messages_contents()
+        else:  # Specific to a certain chat
+            msg_contents = self.parser.get_message_contents(chat_name)
 
-        # # across all chats, in specific chat
-        if not chat_name: # Across all chats
-            for chat_name in self.chat_list:
-                b = 0
-        else: # Specific to a certain chat
-            a = 0
+        usage_dict = {}
+        if person: # Only track usage for single person
+            usage_dict[person] = {}
+        else:
+            for member in self.parser.get_participants(chat_name):
+                usage_dict[member] = {}
 
-    @staticmethod
-    def convert_to_unicode(string):
-        return string.encode('latin1').decode('utf8')
+        for sender, text in msg_contents:
+            if not person or person == sender:
+                emoji_counts = self.get_emoji_counts(text)
+                for emoji_uc in emoji_counts:
+                    if emoji_uc not in usage_dict[sender]:
+                        usage_dict[sender][emoji_uc] = 0
+                    usage_dict[sender][emoji_uc] += 1
+
+        for sender in usage_dict:
+            # Sort from most used to the least used emoji
+            usage_dict[sender] = dict(sorted(usage_dict[sender].items(), key=lambda item: item[1], reverse=True))
+        return usage_dict
 
     @staticmethod
     def get_emoji_counts(string):
-        unicode_str = TextAnalyzer.convert_to_unicode(string)
-        emoji_data = emoji.emoji_list(unicode_str)
-        distinct_emojis = emoji.distinct_emoji_list(unicode_str)
+        emoji_data = emoji.emoji_list(string)
+        distinct_emojis = emoji.distinct_emoji_list(string)
         emoji_counts = {}
         for emoji_str in distinct_emojis:
             emoji_counts[emoji_str] = 0
@@ -205,19 +222,21 @@ if __name__ == "__main__":
     text_analyzer = TextAnalyzer() 
     # print(text_analyzer.featureExample())
     # text_analyzer.parse_time(1663036596463)
-    print(text_analyzer.chat_list)
+    # print(text_analyzer.chat_list)
     chat0 = 'jessicaandnatalie_p54k8tywpw'
     chat1 = "nataliesuboc_3kprn6_mtg"
     chat2 = 'juliadeng_ceaz1qgcsg'
     chat3 = 'juliaandnatalie_ut8vdbynta'
+    chat4 = 'up_d9qf1gvmwg'
     # print(text_analyzer.get_sender_times(chat0))
     # text_analyzer.analyze_convo_initiator(chat0)
-    print(text_analyzer.get_avg_response_times(chat3))
-    print(emoji.emojize('Python is :thumbs_up:'))
-    s = "\u00f0\u009f\u00a4\u0094\u00f0\u009f\u00a4\u0094"
-    d = s.encode('latin1').decode('utf8')
-    print(text_analyzer.get_emoji_counts(s))
+    # print(text_analyzer.get_avg_response_times(chat3))
 
+    print(text_analyzer.get_emoji_usage(person='Natalie Suboc'))
+    print(text_analyzer.get_emoji_usage(person='Jessica Liang'))
+    print(text_analyzer.get_emoji_usage(person='Harmony He'))
+    print(text_analyzer.get_emoji_usage(chat0))
+    print(text_analyzer.get_emoji_usage(chat4))
 
     # print(text_analyzer.chat_list)
     #chat0 = 'jessicaandnatalie_p54k8tywpw'
