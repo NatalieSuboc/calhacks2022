@@ -17,6 +17,8 @@ class JsonParser:
         """
         chat_data = {}
         for chat_name in self.chats_list:
+            if chat_name == ".DS_Store":
+                continue
             # Open JSON file
             filename = self.dir_path + chat_name + "/message_1.json"
             f = open(filename)
