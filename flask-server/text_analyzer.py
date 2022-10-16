@@ -8,8 +8,8 @@ class TextAnalyzer:
     def __init__(self): 
         self.parser = JsonParser()
         self.chat_list = self.parser.get_chats_list()
-        self.name = "Jessica Liang" #TODO: where should i deal w this
         self.chat_data = self.parser.chat_data
+        self.name = self.parser.name
 
 
     # Example
