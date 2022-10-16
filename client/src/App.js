@@ -2,16 +2,23 @@ import React, { useState, useEffect } from 'react'
 import './App.css';
 
 function App() {
-    const [emojiUsage, setEmojiUsage] = useState(null);
+    const [emojiUsage, setEmojiUsage] = useState();
 
-    useEffect(() => {
+    const handleEmojiUsageClick = (e) => {
         fetch("/emoji_usage").then((response) => {
             if (response.status == 200) {
                 return response.json();
+               // console.log(response.json());
             }
-        })
-        .then(setEmojiUsage);
-    });
+        }).then(setEmojiUsage)
+        a();
+    }
+
+    function a() {
+        console.log("Harmony")
+    }
+
+
   /*const [data, setData] = useState([{}])
   useEffect(() => {
     fetch("/members").then(
@@ -80,9 +87,10 @@ function App() {
           <input type="file" webkitdirectory="" mozdirectory="" directory="" onChange={uploadFile} />
       </label>
 
+      <button onClick={handleEmojiUsageClick}> Emojiii </button>
       <p>
-          {JSON.stringify(emojiUsage)}
           {
+          JSON.stringify(emojiUsage)
 //          Object.keys(emojiUsage).map((key, index) => (
 //            <p key={index}> this is my key {key} and this is my value {emojiUsage[key]}</p>
 //          ))
