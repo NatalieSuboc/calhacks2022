@@ -7,6 +7,8 @@ from nltk.corpus import stopwords
 
 from json_parser import JsonParser
 
+EMOJI_LENGTH = 16
+
 
 class TextAnalyzer: 
     def __init__(self): 
@@ -144,7 +146,8 @@ class TextAnalyzer:
                 # do not process for image-only / no text content
                 if 'content' not in message:
                     continue
-                length = len(message['content']) # TODO Condense emojis
+                counts = sum(TextAnalyzer.get_emoji_counts(message['content']).values())
+                length = len(message['content']) - (counts * 16) # TODO Condense emojis
                 if message['sender_name'] not in message_counts.keys(): 
                     message_counts[message['sender_name']] = (length, 1)
                 else:
@@ -155,7 +158,8 @@ class TextAnalyzer:
             counts = message_counts[person]
             avg = counts[0] / counts[1]
             averages[person] = avg
-        return averages
+        sorted_avgs = sorted(averages.items(), key=lambda x: x[1], reverse=True)
+        return dict(sorted_avgs)
 
 
     # --------------TIME ANALYSIS FUNCTIONS----------------------------
@@ -237,14 +241,14 @@ if __name__ == "__main__":
     text_analyzer = TextAnalyzer() 
     # print(text_analyzer.featureExample())
     # text_analyzer.parse_time(1663036596463)
-    print(text_analyzer.chat_list)
+    # print(text_analyzer.chat_list)
     chat0 = 'data100_lz3zyc82pq'
     #chat1 = "nataliesuboc_3kprn6_mtg"
     #chat2 = 'juliadeng_ceaz1qgcsg'
     chat3 = 'jessicaandharmony_uol5psbvsg'
     # print(text_analyzer.get_sender_times(chat0))
     # text_analyzer.analyze_convo_initiator(chat0)
-    print(text_analyzer.get_avg_response_times(chat3))
+    # print(text_analyzer.get_avg_response_times(chat3))
     print(emoji.emojize('Python is :thumbs_up:'))
     s = "\u00f0\u009f\u00a4\u0094\u00f0\u009f\u00a4\u0094"
     d = s.encode('latin1').decode('utf8')
