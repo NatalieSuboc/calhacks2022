@@ -1,5 +1,7 @@
 import math
 import nltk
+import emoji
+# from emoji import UNICODE_EMOJI_ENGLISH
 from datetime import datetime, timedelta
 from nltk.corpus import stopwords
 
@@ -42,6 +44,12 @@ class TextAnalyzer:
         return init_counts
 
     def get_avg_response_times(self, chat_name, threshold=timedelta(hours=6)):
+        """
+        Returns count + avg response time for each member in the chat
+        :param chat_name:
+        :param threshold:
+        :return:
+        """
         # Get time diffs b/t message and previous
         time_diffs = self.get_time_diffs(chat_name)
         time_diffs.pop(0)
@@ -70,7 +78,7 @@ class TextAnalyzer:
                 formatted_rate += f'{hours} Hours, '
             minutes, seconds = divmod(remainder, 60)
             formatted_rate += f'{minutes} Minutes, {seconds} Seconds'
-            response_rates[member] = (count, formatted_rate)
+            response_rates[member] = formatted_rate
         return response_rates
 
     # Add Additional Features Here
@@ -152,7 +160,13 @@ class TextAnalyzer:
 
     # --------------TIME ANALYSIS FUNCTIONS----------------------------
     def get_sender_times(self, chat_name):
+        """
+        Returns a list of sender and times in chronological order, from earliest to latest message.
+        :param chat_name:
+        :return:
+        """
         chat_data = self.parser.get_messages(chat_name)
+        print(chat_data)
         sender_times = []
         for text in chat_data:
             sender = text['sender_name']
@@ -161,6 +175,12 @@ class TextAnalyzer:
         return sender_times
 
     def get_time_diffs(self, chat_name):
+        """
+        Gets time passed from previous message for each sender.
+        The first time's time diff is inf(since no prev sender)
+        :param chat_name:
+        :return:
+        """
         sender_times = self.get_sender_times(chat_name)
         time_diffs = []
         prev_time = None
@@ -175,6 +195,7 @@ class TextAnalyzer:
 
     @staticmethod
     def parse_time(timestamp):
+        # Returns timestamp parsed into a datetime obj
         timestamp_dt = datetime.fromtimestamp(timestamp/1000.0).replace(microsecond=0)
         return timestamp_dt
 
@@ -182,6 +203,34 @@ class TextAnalyzer:
     def multiply_td(time_delta, k):
         # Returns 'time_delta' multiplied by 'k'
         return timedelta(seconds=time_delta.total_seconds() * k)
+
+    # ------------------EMOJI ANALYSIS FUNCTIONS---------------------
+    def get_emoji_usage(self, chat_name=None):
+
+        # # across all chats, in specific chat
+        if not chat_name: # Across all chats
+            for chat_name in self.chat_list:
+                b = 0
+        else: # Specific to a certain chat
+            a = 0
+
+    @staticmethod
+    def convert_to_unicode(string):
+        return string.encode('latin1').decode('utf8')
+
+    @staticmethod
+    def get_emoji_counts(string):
+        unicode_str = TextAnalyzer.convert_to_unicode(string)
+        emoji_data = emoji.emoji_list(unicode_str)
+        distinct_emojis = emoji.distinct_emoji_list(unicode_str)
+        emoji_counts = {}
+        for emoji_str in distinct_emojis:
+            emoji_counts[emoji_str] = 0
+        for item in emoji_data:
+            emoji_str = item['emoji']
+            emoji_counts[emoji_str] += 1
+
+        return emoji_counts
 
 
 if __name__ == "__main__":
@@ -194,10 +243,12 @@ if __name__ == "__main__":
     #chat2 = 'juliadeng_ceaz1qgcsg'
     chat3 = 'jessicaandharmony_uol5psbvsg'
     # print(text_analyzer.get_sender_times(chat0))
-    text_analyzer.analyze_convo_initiator(chat0)
-    print(text_analyzer.get_avg_response_times(chat0))
-
-
+    # text_analyzer.analyze_convo_initiator(chat0)
+    print(text_analyzer.get_avg_response_times(chat3))
+    print(emoji.emojize('Python is :thumbs_up:'))
+    s = "\u00f0\u009f\u00a4\u0094\u00f0\u009f\u00a4\u0094"
+    d = s.encode('latin1').decode('utf8')
+    print(text_analyzer.get_emoji_counts(s))
 
 
     # print(text_analyzer.chat_list)
@@ -207,4 +258,5 @@ if __name__ == "__main__":
     #text_analyzer.analyze_convo_initiator(chat0)
     #print(text_analyzer.get_common_words_used('Natalie Suboc', num=60))
     print(text_analyzer.get_avg_text_length())
+    # print(text_analyzer.analyze_num_messages_sent())
 
