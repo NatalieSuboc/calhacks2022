@@ -6,7 +6,8 @@ class JsonParser:
     def __init__(self):
         self.dir_path = "../messages/inbox/"
         self.chats_list = os.listdir(self.dir_path)
-        self.chats_list.remove('.DS_Store')
+        if '.DS_Store' in self.chats_list:
+            self.chats_list.remove('.DS_Store')
         # 'self.chat_data': dict('chat_name' -> 'data')
         self.chat_data = self.load_chat_data()
 
