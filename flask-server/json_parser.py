@@ -29,6 +29,16 @@ class JsonParser:
             # Fields: messages,title,is_still_participant,thread_type,thread_path,magic_words,joinable_mode,participants
         return chat_data
 
+    def get_message_contents(self, chat_name):
+        messages = self.get_messages(chat_name)
+        return [(msg['sender_name'], msg['content']) for msg in messages if 'content' in msg]
+
+    def get_all_messages_contents(self):
+        msg_contents = []
+        for chat_name in self.chats_list:
+            msg_contents += self.get_message_content(chat_name)
+        return msg_contents
+
     def load_autofill_info(self):
         """
         Reads in autofill information (metadata)
@@ -58,7 +68,7 @@ class JsonParser:
 
     def get_messages(self, chat_name):
         """
-        Returns list of participants in the specified chat
+        Returns message data for the specified chat
         :param chat_name: Name of chat
         :return:
         """
@@ -72,8 +82,8 @@ class JsonParser:
         """
         return self.autofill_info['autofill_information_v2']['FULL_NAME'][0]
 
-
 if __name__ == "__main__":
     parser = JsonParser()
     print(parser.get_participants('ashleychang_m8xwv9ddua'))
     print(parser.get_messages('ashleychang_m8xwv9ddua'))
+    print(parser.get_all_messages_content())
