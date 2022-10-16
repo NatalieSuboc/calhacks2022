@@ -43,7 +43,7 @@ class TextAnalyzer:
 
     # Add Additional Features Here
 
-        '''
+    '''
     Feature: Most Common Words Used
     - Discerns most common words used by the user.
     '''
@@ -65,6 +65,26 @@ class TextAnalyzer:
         word_counts = dict(sorted_counts)
         words = [word for word in list(word_counts) if word.lower() not in set(stopwords.words('english'))]
         return words[:num]
+
+    '''
+    Feature: Analyze Number Messages Sent
+
+    '''
+    def analyze_num_messages_sent(self):
+        # exclude group chats?
+        message_counts = {} # (person, message_count)
+        for chat in self.parser.get_chats_list():
+            messages = self.parser.get_messages(chat)
+            for message in messages:
+                if message['sender_name'] not in message_counts.keys():
+                    message_counts[message['sender_name']] = 1
+                else:
+                    message_counts[message['sender_name']] += 1
+        sorted_counts = sorted(message_counts.items(), key=lambda x: x[1], reverse=True)
+        # print(sorted_counts)
+        most_sent = sorted_counts[0]
+        least_sent = sorted_counts[len(sorted_counts)-1]
+        return sorted_counts
 
     # --------------TIME ANALYSIS FUNCTIONS----------------------------
     def get_sender_times(self, chat_name):
@@ -104,5 +124,6 @@ if __name__ == "__main__":
     #chat1 = "nataliesuboc_3kprn6_mtg"
     # print(text_analyzer.get_sender_times(chat0))
     #text_analyzer.analyze_convo_initiator(chat0)
-    print(text_analyzer.get_common_words_used('Natalie Suboc', num=60))
+    #print(text_analyzer.get_common_words_used('Natalie Suboc', num=60))
+    print(text_analyzer.analyze_num_messages_sent())
 
