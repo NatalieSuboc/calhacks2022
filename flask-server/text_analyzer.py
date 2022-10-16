@@ -41,6 +41,38 @@ class TextAnalyzer:
                 init_counts[sender] += 1
         return init_counts
 
+    def get_avg_response_times(self, chat_name, threshold=timedelta(hours=6)):
+        # Get time diffs b/t message and previous
+        time_diffs = self.get_time_diffs(chat_name)
+        time_diffs.pop(0)
+        response_rates = {}
+        members = self.parser.get_participants(chat_name)
+        for member in members:
+            response_rates[member] = (0, timedelta(seconds=0))  # (Count, Avg Response Time)
+
+        for (sender, time_passed) in time_diffs:
+            # If the time passed from last text sent is less than threshold,
+            # then we count it as responding to a text, instead of initiating a new convo.
+            if time_passed <= threshold:
+                n, avg_response_time = response_rates[sender]
+
+                avg_response_time = self.multiply_td(avg_response_time, n/(n+1)) + (time_passed / (n + 1))
+                response_rates[sender] = (n + 1, avg_response_time)
+
+        for member in members:
+            formatted_rate = ''
+            count, rate = response_rates[member]
+            days, remainder = divmod(rate.seconds, 3600 * 24)
+            if days > 0:
+                formatted_rate += f'{days} Days, '
+            hours, remainder = divmod(remainder, 3600)
+            if len(formatted_rate) > 0 or hours > 0:
+                formatted_rate += f'{hours} Hours, '
+            minutes, seconds = divmod(remainder, 60)
+            formatted_rate += f'{minutes} Minutes, {seconds} Seconds'
+            response_rates[member] = (count, formatted_rate)
+        return response_rates
+
     # Add Additional Features Here
 
     '''
@@ -114,11 +146,28 @@ class TextAnalyzer:
         timestamp_dt = datetime.fromtimestamp(timestamp/1000.0).replace(microsecond=0)
         return timestamp_dt
 
+    @staticmethod
+    def multiply_td(time_delta, k):
+        # Returns 'time_delta' multiplied by 'k'
+        return timedelta(seconds=time_delta.total_seconds() * k)
+
 
 if __name__ == "__main__":
     text_analyzer = TextAnalyzer() 
     # print(text_analyzer.featureExample())
     # text_analyzer.parse_time(1663036596463)
+    print(text_analyzer.chat_list)
+    chat0 = 'jessicaandnatalie_p54k8tywpw'
+    chat1 = "nataliesuboc_3kprn6_mtg"
+    chat2 = 'juliadeng_ceaz1qgcsg'
+    chat3 = 'juliaandnatalie_ut8vdbynta'
+    # print(text_analyzer.get_sender_times(chat0))
+    text_analyzer.analyze_convo_initiator(chat0)
+    print(text_analyzer.get_avg_response_times(chat3))
+
+
+
+
     # print(text_analyzer.chat_list)
     #chat0 = 'jessicaandnatalie_p54k8tywpw'
     #chat1 = "nataliesuboc_3kprn6_mtg"
