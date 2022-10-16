@@ -1,5 +1,6 @@
 from io import BytesIO
 from flask import Flask, jsonify, request
+from text_analyzer import TextAnalyzer
 
 app = Flask(__name__)
 
@@ -23,6 +24,20 @@ def upload_file():
         d['status'] = 0
 
     return jsonify(d)
+
+
+@app.route('/emoji_usage')
+def get_emoji_usage():
+    chat0 = 'jessicaandnatalie_p54k8tywpw'
+    chat1 = "nataliesuboc_3kprn6_mtg"
+    chat2 = 'juliadeng_ceaz1qgcsg'
+    chat3 = 'juliaandnatalie_ut8vdbynta'
+    chat4 = 'up_d9qf1gvmwg'
+
+    text_analyzer = TextAnalyzer()
+    emoji_usage = text_analyzer.get_emoji_usage(chat0)
+    return jsonify(emoji_usage)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

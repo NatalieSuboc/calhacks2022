@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react'
 import './App.css';
 
 function App() {
+    const [emojiUsage, setEmojiUsage] = useState(null);
 
+    useEffect(() => {
+        fetch("/emoji_usage").then((response) => {
+            if (response.status == 200) {
+                return response.json();
+            }
+        })
+        .then(setEmojiUsage);
+    });
   /*const [data, setData] = useState([{}])
   useEffect(() => {
     fetch("/members").then(
@@ -61,6 +70,7 @@ function App() {
       }
     }
   }
+
   return (
     <div>
       <div style={{ width: '100%', float: 'left' }}>
@@ -69,8 +79,18 @@ function App() {
       <label htmlFor="contained-button-file">
           <input type="file" webkitdirectory="" mozdirectory="" directory="" onChange={uploadFile} />
       </label>
+
+      <p>
+          {JSON.stringify(emojiUsage)}
+          {
+//          Object.keys(emojiUsage).map((key, index) => (
+//            <p key={index}> this is my key {key} and this is my value {emojiUsage[key]}</p>
+//          ))
+        }
+      </p>
     </div>
+
+
   );
 }
-
 export default App;
