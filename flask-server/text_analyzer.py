@@ -1,5 +1,7 @@
 import math
+import nltk
 from datetime import datetime, timedelta
+from nltk.corpus import stopwords
 
 from json_parser import JsonParser
 
@@ -73,6 +75,29 @@ class TextAnalyzer:
 
     # Add Additional Features Here
 
+        '''
+    Feature: Most Common Words Used
+    - Discerns most common words used by the user.
+    '''
+    def get_common_words_used(self, name, num=20):
+        word_counts = {} # key: word, count: value
+        for chat in self.parser.get_chats_list():
+            messages = self.parser.get_messages(chat)
+            for message in messages:
+                # add words if written by the user 
+                if message['sender_name'] == name and 'content' in message:
+                    text = message['content']
+                    words = text.split(' ')
+                    for word in words:
+                        if word in word_counts.keys():
+                            word_counts[word] += 1
+                        else:
+                            word_counts[word] = 1
+        sorted_counts = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)
+        word_counts = dict(sorted_counts)
+        words = [word for word in list(word_counts) if word.lower() not in set(stopwords.words('english'))]
+        return words[:num]
+
     # --------------TIME ANALYSIS FUNCTIONS----------------------------
     def get_sender_times(self, chat_name):
         chat_data = self.parser.get_messages(chat_name)
@@ -119,3 +144,14 @@ if __name__ == "__main__":
     # print(text_analyzer.get_sender_times(chat0))
     text_analyzer.analyze_convo_initiator(chat0)
     print(text_analyzer.get_avg_response_times(chat3))
+
+
+
+
+    # print(text_analyzer.chat_list)
+    #chat0 = 'jessicaandnatalie_p54k8tywpw'
+    #chat1 = "nataliesuboc_3kprn6_mtg"
+    # print(text_analyzer.get_sender_times(chat0))
+    #text_analyzer.analyze_convo_initiator(chat0)
+    print(text_analyzer.get_common_words_used('Natalie Suboc', num=60))
+
