@@ -75,10 +75,10 @@ class TextAnalyzer:
 
     # Add Additional Features Here
 
-    '''
+    """
     Feature: Most Common Words Used
     - Discerns most common words used by the user.
-    '''
+    """
     def get_common_words_used(self, name, num=20):
         word_counts = {} # key: word, count: value
         for chat in self.parser.get_chats_list():
@@ -117,6 +117,38 @@ class TextAnalyzer:
         most_sent = sorted_counts[0]
         least_sent = sorted_counts[len(sorted_counts)-1]
         return sorted_counts
+    
+    '''
+    Feature: 
+    '''
+    def get_responsiveness_over_time(self, name):
+        responsiveness = [] # list of (time, responsiveness)
+
+
+    """
+    Feature: Average text length
+    """
+    def get_avg_text_length(self):
+        message_counts = {} # person: (total message len, num messages)
+        for chat in self.parser.get_chats_list():
+            messages = self.parser.get_messages(chat)
+            for message in messages:
+                # do not process for image-only / no text content
+                if 'content' not in message:
+                    continue
+                length = len(message['content']) # TODO Condense emojis
+                if message['sender_name'] not in message_counts.keys(): 
+                    message_counts[message['sender_name']] = (length, 1)
+                else:
+                    cur = message_counts[message['sender_name']]
+                    message_counts[message['sender_name']] = (cur[0] + length, cur[1] + 1)
+        averages = {}
+        for person in message_counts.keys():
+            counts = message_counts[person]
+            avg = counts[0] / counts[1]
+            averages[person] = avg
+        return averages
+
 
     # --------------TIME ANALYSIS FUNCTIONS----------------------------
     def get_sender_times(self, chat_name):
@@ -157,13 +189,13 @@ if __name__ == "__main__":
     # print(text_analyzer.featureExample())
     # text_analyzer.parse_time(1663036596463)
     print(text_analyzer.chat_list)
-    chat0 = 'jessicaandnatalie_p54k8tywpw'
-    chat1 = "nataliesuboc_3kprn6_mtg"
-    chat2 = 'juliadeng_ceaz1qgcsg'
-    chat3 = 'juliaandnatalie_ut8vdbynta'
+    chat0 = 'data100_lz3zyc82pq'
+    #chat1 = "nataliesuboc_3kprn6_mtg"
+    #chat2 = 'juliadeng_ceaz1qgcsg'
+    chat3 = 'jessicaandharmony_uol5psbvsg'
     # print(text_analyzer.get_sender_times(chat0))
     text_analyzer.analyze_convo_initiator(chat0)
-    print(text_analyzer.get_avg_response_times(chat3))
+    print(text_analyzer.get_avg_response_times(chat0))
 
 
 
@@ -174,5 +206,5 @@ if __name__ == "__main__":
     # print(text_analyzer.get_sender_times(chat0))
     #text_analyzer.analyze_convo_initiator(chat0)
     #print(text_analyzer.get_common_words_used('Natalie Suboc', num=60))
-    print(text_analyzer.analyze_num_messages_sent())
+    print(text_analyzer.get_avg_text_length())
 
