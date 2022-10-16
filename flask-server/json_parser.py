@@ -10,6 +10,10 @@ class JsonParser:
             self.chats_list.remove('.DS_Store')
         # 'self.chat_data': dict('chat_name' -> 'data')
         self.chat_data = self.load_chat_data()
+        f = open("../messages/autofill_information.json")
+        personal_data = json.load(f)
+        self.name = next(iter(personal_data.values()))["FULL_NAME"][0]
+    
 
     def load_chat_data(self):
         """
@@ -53,8 +57,50 @@ class JsonParser:
         return self.chat_data[chat_name]['messages']
         # sender_name, timestamp_ms, content, reactions/actor
 
+    def parse_group_chat_name(self, chat_name): 
+        """
+        Returns a formatted version of a group chat name, removing hash value
+        :param chat_name: Name of chat
+        :return:
+
+        i.e. natalieandharmony_1ls9g4820 returns Natalie & Harmony & Jessica
+        """
+        
+        participants = self.get_participants(chat_name)
+        # if len(participants) == 2:
+        #     raise Exception("This is not a group chat.")
+        
+        # Check if this is a named group chat, or a default named group chat 
+        isNamed = False
+        selfBuffer = 0 
+        for participant in participants: 
+            if participant.lower()[0] in chat_name:
+                continue 
+            else: 
+                selfBuffer += 1 
+                if selfBuffer > 1:
+                    isNamed = True 
+
+        for participant in participants:
+            if participant == self.name: 
+                continue 
+            if participant.lower()[0] in chat_name: 
+                continue 
+            else: 
+                isNamed = True 
+
+        # If the group chat is named, use the name
+        if isNamed: 
+            return chat_name.split("_")[0].capitalize()
+            
+
+        # If the group chat is unnamed, use the names of all participants
+        if not isNamed:
+            participants.remove(self.name)
+            return " & ".join(participants)
+
 
 if __name__ == "__main__":
     parser = JsonParser()
-    print(parser.get_participants('ashleychang_m8xwv9ddua'))
-    print(parser.get_messages('ashleychang_m8xwv9ddua'))
+    # print(parser.get_participants('ashleychang_m8xwv9ddua'))
+    # print(parser.get_messages('ashleychang_m8xwv9ddua'))
