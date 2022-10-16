@@ -6,6 +6,8 @@ class JsonParser:
     def __init__(self):
         self.dir_path = "../messages/inbox/"
         self.chats_list = os.listdir(self.dir_path)
+        if '.DS_Store' in self.chats_list:
+            self.chats_list.remove('.DS_Store')
         # 'self.chat_data': dict('chat_name' -> 'data')
         self.chat_data = self.load_chat_data()
         self.autofill_info = self.load_autofill_info()
@@ -18,8 +20,6 @@ class JsonParser:
         """
         chat_data = {}
         for chat_name in self.chats_list:
-            if chat_name == ".DS_Store":
-                continue
             # Open JSON file
             filename = self.dir_path + chat_name + "/message_1.json"
             f = open(filename)
